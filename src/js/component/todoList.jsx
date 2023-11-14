@@ -30,11 +30,11 @@ const TodoList = () => {
                 onKeyDown={addTask} 
                 placeholder="Write a note"
                 />
-						<GetData />
-
+                <GetData />
                 {tasks.map( (task) => (
                     <li className="list-group-item list-group-item-action text-secondary ">
                         {task}
+                        
                         <button 
                             className="btn btn-light btn-sm float-end text-secondary link-hover"
                             onClick={() => deleteTask(task)}
@@ -46,7 +46,6 @@ const TodoList = () => {
                             </svg>
                         </i>
                         </button>   
-
                     </li>
                 ))}
                 <p className="list-group-item list-group-item-action text-start text-small text-secondary">{tasks.length} Items left</p>
