@@ -1,25 +1,75 @@
-import React, { useState } from 'react'
-import GetData from './getData'
+import React, { useState, useEffect } from 'react'
 
 const TodoList = () => {
 
     const [input1, setInput1 ] = useState('')
-    const [tasks, setTasks]=useState([])
+    const [tasks, setTasks] = useState([])
 
+    //fetch API
+      useEffect(() => {
+          fetchTasksFromAPI();
+        }, []);
+//
+          const fetchTasksFromAPI = () => {    
+            fetch("https://playground.4geeks.com/apis/fake/todos/user/pascual")
+              .then((response) => response.json())
+              .then((data) => setTasks(data))
+              .catch((error) => console.error("Error fetching tasks from API", error));
+    };
+
+      useEffect(()=>{
+          fetch('https://playground.4geeks.com/apis/fake/todos/user/pascual')
+          .then(response => response.json())
+          .then((data)=> setTasks(data))
+      })
+
+      //Add Task
     const addTask = (event) => {
-        if (event.key === "Enter" && input1.trim() !== '') {  // write the event only if I press enter and the input is not empty
-          setTasks(tasks.concat(input1)) 
-          setInput1("")
-        }
-    }
-
-    const deleteTask = (task) =>{
-        setTasks(tasks.filter(item => item !== task))
-    }
+        if (event.key === "Enter" && input1.trim() !== '') {
+            setTasks(tasks.concat(input1)) 
+            //setInput1("")
+          const newtask = { label: input1, done: false };
+          
+          fetch("https://playground.4geeks.com/apis/fake/todos/user/pascual", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify([...tasks, newtask]),
+          })
+            .then((response) => response.json())
+            .then(() => {
+              fetchtasksFromAPI();
+            })
+            .catch((error) => console.error("Error adding task to API", error));
     
+          setInput1("");
+        }
+      };
+
+    //Delete Task
+        const deleteTask = (task) => {
+        setTasks(tasks.filter(item => item !== task))
+
+        const updatedtasks = [...tasks];
+        updatedtasks.splice(tasks, 1);
+       
+        fetch("https://playground.4geeks.com/apis/fake/todos/user/pascual", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedtasks),
+        })
+          .then((response) => response.json())
+          .then(() => {
+            // Fetch the updated task list from the API
+            fetchtasksFromAPI();
+          })
+          .catch((error) => console.error("Error deleting task from API", error));
+      };
     return (
         <div>
-            
             <h1 className="p-3 m-2 mx-auto text-center"> TODOS </h1>
 
             <div className="list-group mx-auto" style={{width:"400px"}}>
@@ -30,11 +80,12 @@ const TodoList = () => {
                 onKeyDown={addTask} 
                 placeholder="Write a note"
                 />
-                <GetData />
-                {tasks.map( (task) => (
-                    <li className="list-group-item list-group-item-action text-secondary ">
-                        {task}
-                        
+                {tasks.map( (task, index) => (
+                    <li className="list-group-item list-group-item-action text-secondary"
+                        key={index}
+                    >
+                        {task.label}
+
                         <button 
                             className="btn btn-light btn-sm float-end text-secondary link-hover"
                             onClick={() => deleteTask(task)}
